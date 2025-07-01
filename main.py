@@ -16,8 +16,9 @@ load_dotenv()
 
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
-st.title("News Research Tool 📈")
-st.sidebar.title("News URLs")
+st.title("Simple RAG Tool 📈")
+st.sidebar.title("Enter URLs for retrieval")
+st.sidebar.subheader("News articles, Blogs, or any other web content...")
 
 urls= []
 for i in range(3):

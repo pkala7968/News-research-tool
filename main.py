@@ -1,8 +1,6 @@
 import os
 import streamlit as st
-import pickle
 import time
-import langchain
 from langchain_google_genai import GoogleGenerativeAI
 from langchain.chains import RetrievalQAWithSourcesChain
 from langchain.chains.qa_with_sources  import load_qa_with_sources_chain

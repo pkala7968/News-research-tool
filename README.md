@@ -44,7 +44,7 @@ streamlit run main.py
 ## Check it out!
 
 ![Input Body](demo-imgs/Query.png)
-![Output Body](demo-imgs/Retrievel.png)
+![Output Body](demo-imgs/Retrieve.png)
 
 ---
 

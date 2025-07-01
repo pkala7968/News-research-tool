@@ -28,6 +28,9 @@ process_urls= st.sidebar.button("Load URLS")
 
 main_placeholder = st.empty()
 
+#initialize globally 
+embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+
 if process_urls:
     #load data
     loader= UnstructuredURLLoader(urls=urls)
@@ -40,36 +43,36 @@ if process_urls:
     )
     main_placeholder.text("Splitting data into chunks...")
     docs = text_splitter.split_documents(data)
-    #create embeddings
-    embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+    
     #create vectorstore
     main_placeholder.text("Creating vectorstore...")
     time.sleep(2) 
     vectorstore = FAISS.from_documents(docs, embeddings)
-    vectorindex = FAISS.load_local(
-        "faiss_index",
-        embeddings,
-        allow_dangerous_deserialization=True
-    )
+    vectorstore.save_local("faiss_index")
+    
 
 query = main_placeholder.text_input("Enter your query:")
 if query:
-    if os.file.exists("faiss_index"):
-        with open("faiss_index", "rb") as f:
-            vectorindex = pickle.load(f)
-            chain= RetrievalQAWithSourcesChain.from_llm(
-                llm=GoogleGenerativeAI(model="gemini-2.0-flash", api_key=GOOGLE_API_KEY, temperature=0.5, max_output_tokens=250),
-                retriever=vectorindex.as_retriever()
-            )
-            result= chain({"question": query}, return_only_outputs=True)
-            main_placeholder.text("Processing your query...")
+    if os.path.exists("faiss_index"):
+        vectorindex = FAISS.load_local(
+        "faiss_index",
+        embeddings,
+        allow_dangerous_deserialization=True
+        )
+        chain= RetrievalQAWithSourcesChain.from_llm(
+            llm=GoogleGenerativeAI(model="gemini-2.0-flash", api_key=GOOGLE_API_KEY, temperature=0.5, max_output_tokens=250),
+            retriever=vectorindex.as_retriever()
+        )
+        main_placeholder.text("Processing your query...")
+        result= chain({"question": query}, return_only_outputs=True)
+        main_placeholder.empty()  # Clear the placeholder after processing
 
-            st.subheader("Results:")
-            st.write(result['answer'])
+        st.subheader("Results:")
+        st.write(result['answer'])
 
-            sources= result.get('sources', [])
-            if sources:
-                st.subheader("Sources:")
-                sources_list= sources.split("\n")
-                for source in sources_list:
-                    st.write(source)
+        sources= result.get('sources', [])
+        if sources:
+            st.subheader("Sources:")
+            sources_list= sources.split("\n")
+            for source in sources_list:
+                st.write(source)
